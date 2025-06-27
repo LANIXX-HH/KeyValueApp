@@ -12,8 +12,13 @@ dist
 dist-ssr
 *.local
 
-# Environment variables
+# Environment variables - NEVER commit these!
 .env
+.env.*
+_env
+_env.*
+*.env
+env.*
 .env.local
 .env.development.local
 .env.test.local
