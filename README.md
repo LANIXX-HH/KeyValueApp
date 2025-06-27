@@ -28,22 +28,26 @@ Eine vollständig serverlose Webanwendung mit AWS Cognito-Authentifizierung und 
 Du benötigst folgende AWS-Services in deinem Account:
 
 ### 1. Cognito User Pool
+
 - **Zweck**: Benutzerregistrierung und Anmeldung
 - **Konfiguration**: E-Mail als Username, Passwort-Policy
 - **Ausgabe**: User Pool ID + Client ID
 
 ### 2. Cognito Identity Pool
+
 - **Zweck**: AWS-Credentials für Frontend
 - **Konfiguration**: Verknüpfung mit User Pool
 - **Ausgabe**: Identity Pool ID
 
 ### 3. DynamoDB Tabelle
+
 - **Name**: `KeyValueStore` (oder beliebig)
 - **Partition Key**: `userId` (String)
 - **Sort Key**: `key` (String)
 - **Billing**: Pay-per-Request
 
 ### 4. IAM Role
+
 - **Name**: `CognitoAuthenticatedRole`
 - **Zweck**: DynamoDB-Zugriff für authentifizierte Benutzer
 - **Policy**: Wird automatisch generiert
@@ -51,22 +55,55 @@ Du benötigst folgende AWS-Services in deinem Account:
 ## Installation und Setup
 
 ### Voraussetzungen
+
 - Node.js (Version 18+)
 - AWS CLI konfiguriert
 - AWS Account mit entsprechenden Berechtigungen
 
-### Schritt 1: Repository klonen
+### 🚀 **Option 1: Automatisches Deployment mit CDK (Empfohlen)**
+
+Das Projekt enthält eine vollständige CDK-Infrastruktur für automatisches Deployment:
+
+#### 1.1 Repository klonen
+
 ```bash
 git clone <repository-url>
 cd cognito-keyvalue-app-v2
 npm install
 ```
 
-### Schritt 2: AWS-Ressourcen erstellen
+#### 1.2 CDK-Infrastruktur deployen
 
-Du musst folgende AWS-Ressourcen in deinem Account erstellen:
+```bash
+cd infrastructure
+npm install
+npx cdk bootstrap  # Einmalig pro AWS Account/Region
+npx cdk deploy
+```
+
+#### 1.3 CDK-Outputs in .env eintragen
+
+Nach dem Deployment zeigt CDK die erstellten Ressourcen an:
+
+```bash
+# CDK-Outputs kopieren und in .env eintragen
+cp .env.example .env
+# Werte aus CDK-Output einfügen
+```
+
+#### 1.4 App starten
+
+```bash
+npm run setup
+npm run dev
+```
+
+### 🔧 **Option 2: Manuelles Setup (für Lernzwecke)**
+
+Wenn du die AWS-Ressourcen manuell erstellen möchtest:
 
 #### 2.1 Cognito User Pool erstellen
+
 ```bash
 aws cognito-idp create-user-pool \
   --pool-name "KeyValueApp-UserPool" \
@@ -78,6 +115,7 @@ aws cognito-idp create-user-pool \
 **Notiere die `UserPoolId` aus der Antwort!**
 
 #### 2.2 User Pool Client erstellen
+
 ```bash
 aws cognito-idp create-user-pool-client \
   --user-pool-id <DEINE_USER_POOL_ID> \
@@ -88,6 +126,7 @@ aws cognito-idp create-user-pool-client \
 **Notiere die `ClientId` aus der Antwort!**
 
 #### 2.3 Identity Pool erstellen
+
 ```bash
 aws cognito-identity create-identity-pool \
   --identity-pool-name "KeyValueApp-IdentityPool" \
@@ -98,6 +137,7 @@ aws cognito-identity create-identity-pool \
 **Notiere die `IdentityPoolId` aus der Antwort!**
 
 #### 2.4 DynamoDB Tabelle erstellen
+
 ```bash
 aws dynamodb create-table \
   --table-name KeyValueStore \
@@ -113,11 +153,13 @@ aws dynamodb create-table \
 ### Schritt 3: Umgebungsvariablen konfigurieren
 
 #### 3.1 .env-Datei erstellen
+
 ```bash
 cp .env.example .env
 ```
 
 #### 3.2 .env-Datei mit deinen AWS-Werten ausfüllen
+
 ```bash
 # AWS Region (wo deine Ressourcen erstellt wurden)
 VITE_AWS_REGION=your-region
@@ -139,6 +181,7 @@ VITE_AWS_ACCOUNT_ID=your-account-id
 ```
 
 #### 3.3 AWS Account ID herausfinden
+
 ```bash
 aws sts get-caller-identity --query Account --output text
 ```
@@ -146,15 +189,18 @@ aws sts get-caller-identity --query Account --output text
 ### Schritt 4: IAM-Berechtigungen einrichten
 
 #### 4.1 IAM-Policies generieren
+
 ```bash
 npm run generate-policies
 ```
 
 Dies erstellt automatisch:
+
 - `iam-policy.json` - DynamoDB-Berechtigungen
 - `trust-policy.json` - IAM Role Trust Policy
 
 #### 4.2 IAM Role erstellen
+
 ```bash
 # Role erstellen
 aws iam create-role \
@@ -169,6 +215,7 @@ aws iam put-role-policy \
 ```
 
 #### 4.3 Identity Pool mit IAM Role verknüpfen
+
 ```bash
 aws cognito-identity set-identity-pool-roles \
   --identity-pool-id <DEINE_IDENTITY_POOL_ID> \
@@ -178,21 +225,24 @@ aws cognito-identity set-identity-pool-roles \
 ### Schritt 5: App starten
 
 #### 5.1 Setup ausführen
+
 ```bash
 npm run setup
 ```
 
 #### 5.2 Development-Server starten
+
 ```bash
 npm run dev
 ```
 
 #### 5.3 App öffnen
-Öffne http://localhost:5173 in deinem Browser
+
+Öffne <http://localhost:5173> in deinem Browser
 
 ## Umgebungsvariablen-Referenz
 
-### Erforderliche Variablen in `.env`:
+### Erforderliche Variablen in `.env`
 
 | Variable | Beschreibung | Beispiel |
 |----------|-------------|----------|
@@ -216,26 +266,30 @@ Du kannst verschiedene `.env`-Dateien für verschiedene Umgebungen erstellen:
 ## Verwendung der App
 
 ### 1. Registrierung
+
 - Neue Benutzer können sich mit E-Mail und Passwort registrieren
 - **E-Mail-Bestätigung ist erforderlich** - prüfe auch den Spam-Ordner
-- **Passwort-Anforderungen**: 
+- **Passwort-Anforderungen**:
   - Mindestens 8 Zeichen
   - Groß- und Kleinbuchstaben
   - Mindestens eine Zahl
   - Sonderzeichen optional
 
 ### 2. E-Mail-Bestätigung
+
 - Nach der Registrierung erhältst du eine E-Mail mit einem 6-stelligen Code
 - Gib den Code auf der Bestätigungsseite ein
 - Der Code ist 24 Stunden gültig
 - Nach erfolgreicher Bestätigung wirst du zur Anmeldeseite weitergeleitet
 
 ### 3. Anmeldung
+
 - Anmeldung mit bestätigter E-Mail-Adresse und Passwort
 - Automatische Session-Verwaltung mit JWT-Tokens
 - Bei erfolgreicher Anmeldung wirst du zum Key-Value Manager weitergeleitet
 
 ### 4. Key-Value Management
+
 - **Hinzufügen**: Neue Key-Value Paare erstellen und in DynamoDB speichern
 - **Bearbeiten**: Bestehende Werte durch Klick auf "Bearbeiten" ändern
 - **Löschen**: Einträge mit Bestätigungsdialog sicher entfernen
@@ -245,32 +299,34 @@ Du kannst verschiedene `.env`-Dateien für verschiedene Umgebungen erstellen:
 
 ## Schnellstart für Entwickler
 
-Wenn du bereits AWS-Ressourcen hast oder schnell loslegen möchtest:
+### 🚀 **Empfohlen: CDK Deployment**
 
-### 1. Repository klonen
 ```bash
 git clone <repository-url>
 cd cognito-keyvalue-app-v2
 npm install
-```
 
-### 2. Umgebungsvariablen setzen
-```bash
-# .env.example zu .env kopieren
+# CDK-Infrastruktur deployen
+cd infrastructure
+npm install
+npx cdk bootstrap
+npx cdk deploy
+
+# .env mit CDK-Outputs konfigurieren
+cd ..
 cp .env.example .env
+# CDK-Outputs in .env eintragen
 
-# .env mit deinen AWS-Werten bearbeiten
-nano .env
-```
-
-### 3. Setup und Start
-```bash
+# App starten
 npm run setup
 npm run dev
 ```
 
-### 4. App öffnen
-http://localhost:5173
+**Siehe `DEPLOYMENT_CDK.md` für detaillierte CDK-Anweisungen.**
+
+### 🔧 **Alternative: Manuelles Setup**
+
+Wenn du die AWS-Ressourcen manuell erstellen möchtest, folge den Schritten in Option 2 oben.
 
 ## Verfügbare Scripts
 
@@ -290,7 +346,8 @@ http://localhost:5173
 - **Umgebungsvariablen**: Keine Secrets im Code - alles über .env-Dateien
 - **Automatische Policy-Generierung**: IAM-Policies werden aus .env-Werten erstellt
 
-### ⚠️ Wichtige Sicherheitshinweise:
+### ⚠️ Wichtige Sicherheitshinweise
+
 - **Niemals** `.env`-Dateien in Git committen
 - **Immer** `.env.example` als Template verwenden  
 - **Produktions-Secrets** nur in sicheren Umgebungen setzen
@@ -299,6 +356,7 @@ http://localhost:5173
 ## Deployment
 
 ### AWS Amplify (Empfohlen)
+
 ```bash
 # Amplify CLI installieren
 npm install -g @aws-amplify/cli
@@ -314,7 +372,9 @@ amplify publish
 ```
 
 ### Manuelles Deployment
+
 1. **Build erstellen**:
+
    ```bash
    npm run build
    ```
@@ -351,7 +411,8 @@ Diese Anwendung nutzt AWS-Services im Pay-per-Use-Modell:
 ## Entwicklung
 
 ### Projektstruktur
-```
+
+```bash
 src/
 ├── components/              # React Komponenten
 │   ├── LoginForm.jsx       # Anmeldeformular mit verbesserter Fehlerbehandlung
@@ -373,6 +434,7 @@ src/
 ```
 
 ### Verfügbare App-Versionen
+
 Die App hat verschiedene Versionen für unterschiedliche Entwicklungsphasen:
 
 1. **`App.jsx`** (Produktionsversion)
@@ -390,6 +452,7 @@ Die App hat verschiedene Versionen für unterschiedliche Entwicklungsphasen:
    - Für Authentifizierungs-Tests
 
 **Aktuelle Version wechseln** in `src/main.jsx`:
+
 ```javascript
 // Für Produktion (DynamoDB)
 import App from './App.jsx'
@@ -398,7 +461,8 @@ import App from './App.jsx'
 import App from './App-working.jsx'
 ```
 
-### Verfügbare Scripts
+### Verfügbare Commands
+
 - `npm run dev` - Entwicklungsserver starten
 - `npm run build` - Produktions-Build erstellen
 - `npm run preview` - Build lokal testen
@@ -408,47 +472,60 @@ import App from './App-working.jsx'
 ### Häufige Probleme und Lösungen
 
 #### 1. Umgebungsvariablen werden nicht geladen
+
 **Problem**: AWS-Konfiguration wird nicht aus .env geladen
-**Lösung**: 
+**Lösung**:
+
 - Stelle sicher, dass `.env` im Root-Verzeichnis liegt
 - Variablen müssen mit `VITE_` beginnen
 - Restart des Dev-Servers nach Änderungen: `npm run dev`
 
 #### 2. AWS Account ID herausfinden
+
 **Problem**: Du kennst deine AWS Account ID nicht
 **Lösung**:
+
 ```bash
 aws sts get-caller-identity --query Account --output text
 ```
 
 #### 3. Button-Klicks funktionieren nicht
+
 **Problem**: Beim Klick auf "Registrieren", "Anmelden" oder "Speichern" passiert nichts.
 **Lösung**: Dieses Problem wurde behoben durch Änderung von `formAction="submit"` zu `onClick`-Handlers.
 
 #### 4. DynamoDB-Zugriff verweigert
+
 **Fehler**: `User is not authorized to perform: dynamodb:Query`
-**Lösung**: 
+**Lösung**:
+
 - IAM-Policy für `CognitoAuthenticatedRole` prüfen
 - Sicherstellen, dass die Policy DynamoDB-Berechtigungen enthält
 - IAM-Policies neu generieren: `npm run generate-policies`
 
 #### 5. E-Mail-Bestätigung schlägt fehl
+
 **Problem**: Code wird nicht akzeptiert
 **Lösungen**:
+
 - Code exakt aus der E-Mail kopieren (keine Leerzeichen)
 - Spam-Ordner überprüfen
 - Code ist nur 24 Stunden gültig
 - Bei Problemen neuen Code anfordern
 
 #### 6. CORS-Fehler
+
 **Problem**: Cross-Origin-Fehler beim API-Aufruf
 **Lösung**: Callback-URLs in Cognito User Pool Client konfigurieren:
+
 - `http://localhost:5173`
 - `https://localhost:5173`
 
 #### 7. Session-Probleme
+
 **Problem**: Benutzer wird automatisch abgemeldet
-**Lösung**: 
+**Lösung**:
+
 - JWT-Token-Ablauf prüfen
 - Browser-Cache leeren
 - Cookies und Local Storage prüfen
@@ -458,15 +535,18 @@ aws sts get-caller-identity --query Account --output text
 Alle Formulare haben Debug-Logging aktiviert. Öffne die **Browser-Entwicklertools (F12)** und schaue in die **Konsole** für detaillierte Informationen:
 
 #### Registrierung
-```
+
+bash```
 Button clicked!
 Form submitted!
-Starte Registrierung für: user@example.com
+Starte Registrierung für: <user@example.com>
 Registrierung erfolgreich - weiterleitung zur Bestätigung
+
 ```
 
 #### E-Mail-Bestätigung
-```
+
+bash```
 Confirm button clicked!
 Confirmation form submitted!
 Starte E-Mail-Bestätigung für: user@example.com mit Code: 123456
@@ -474,15 +554,17 @@ E-Mail-Bestätigung erfolgreich
 ```
 
 #### Anmeldung
-```
+
+bash```
 Login button clicked!
 Login form submitted!
-Starte Anmeldung für: user@example.com
+Starte Anmeldung für: <user@example.com>
 Anmeldung erfolgreich
+
 ```
 
 #### Key-Value Speichern
-```
+bash```
 KeyValue save button clicked!
 KeyValueManager form submitted!
 Speichere in DynamoDB: [user-id] testkey testvalue
@@ -490,11 +572,13 @@ DynamoDB Speichern erfolgreich
 ```
 
 ### Logs und Monitoring
+
 - **Browser-Konsole**: Frontend-Fehler und Debug-Informationen
 - **AWS CloudWatch**: Backend-Logs (falls Lambda-Funktionen verwendet werden)
 - **AWS CloudTrail**: API-Aufrufe und Sicherheitsereignisse
 
 ### Bekannte Einschränkungen
+
 1. **React Keys Warning**: Behoben durch `trackBy="key"` in Table-Komponenten
 2. **Cloudscape Button Events**: Behoben durch Verwendung von `onClick` statt `formAction`
 3. **IAM Policy Conditions**: Vereinfacht für bessere Kompatibilität
@@ -504,23 +588,27 @@ DynamoDB Speichern erfolgreich
 ### Version 2.1 (Juni 2025)
 
 #### 🐛 Behobene Probleme
+
 - **Button-Event-Handling**: Alle Formulare verwenden jetzt `onClick`-Handler statt `formAction="submit"`
 - **React Keys Warning**: Table-Komponenten haben jetzt `trackBy="key"` für eindeutige Zeilen-IDs
 - **IAM-Berechtigungen**: DynamoDB-Policy vereinfacht für bessere Kompatibilität
 - **Fehlerbehandlung**: Spezifische Fehlermeldungen für verschiedene Cognito-Fehler
 
 #### ✨ Neue Features
+
 - **Debug-Logging**: Umfassende Console-Logs für alle Formulare und API-Aufrufe
 - **Verbesserte Validierung**: Bessere Passwort- und E-Mail-Validierung
 - **Benutzerfreundlichkeit**: Klarere Fehlermeldungen und Erfolgsbenachrichtigungen
 - **Multi-Version-Support**: Verschiedene App-Versionen für Entwicklung und Produktion
 
 #### 🔧 Technische Verbesserungen
+
 - **Error Boundaries**: Bessere Fehlerbehandlung auf Komponentenebene
 - **State Management**: Optimierte Zustandsverwaltung für bessere Performance
 - **Code-Struktur**: Aufgeteilte Services für bessere Wartbarkeit
 
 ### Nächste Schritte
+
 - [ ] Sichere IAM-Policy mit Conditions wieder aktivieren
 - [ ] Unit-Tests für alle Komponenten hinzufügen
 - [ ] E2E-Tests mit Cypress implementieren
@@ -534,10 +622,11 @@ MIT License
 ## Support
 
 Bei Fragen oder Problemen:
+
 1. **Debug-Logs prüfen**: Browser-Entwicklertools (F12) → Konsole
 2. **Dokumentation lesen**: Besonders den Troubleshooting-Abschnitt
 3. **Issue erstellen**: Im Repository mit detaillierter Fehlerbeschreibung
-4. **AWS-Status prüfen**: https://status.aws.amazon.com für Service-Ausfälle
+4. **AWS-Status prüfen**: <https://status.aws.amazon.com> für Service-Ausfälle
 
 ## Mitwirkende
 
