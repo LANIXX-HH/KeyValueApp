@@ -10,7 +10,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-policies": "node scripts/generate-iam-policies.js",
-    "setup": "npm run generate-policies && echo '✅ Setup complete! Run npm run dev to start development.'"
+    "setup": "npm run generate-policies && echo '✅ Setup complete! Run npm run dev to start development.'",
+    "deploy": "cd infrastructure && npx cdk deploy",
+    "deploy:full": "npm run deploy && npm run update-env",
+    "update-env": "node scripts/update-env-from-cdk.js",
+    "cdk:bootstrap": "cd infrastructure && npx cdk bootstrap",
+    "cdk:diff": "cd infrastructure && npx cdk diff",
+    "cdk:destroy": "cd infrastructure && npx cdk destroy"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity": "^3.835.0",
