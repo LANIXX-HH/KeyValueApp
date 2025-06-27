@@ -1,0 +1,38 @@
+{
+  "name": "cognito-keyvalue-app-v2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:prod": "vite build --mode production",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "generate-policies": "node scripts/generate-iam-policies.js",
+    "setup": "npm run generate-policies && echo '✅ Setup complete! Run npm run dev to start development.'"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity": "^3.835.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.835.0",
+    "@aws-sdk/client-dynamodb": "^3.835.0",
+    "@aws-sdk/lib-dynamodb": "^3.835.0",
+    "@cloudscape-design/components": "^3.0.1004",
+    "@cloudscape-design/global-styles": "^1.0.44",
+    "amazon-cognito-identity-js": "^6.3.15",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.2",
+    "dotenv": "^16.4.5",
+    "eslint": "^9.29.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.2.0",
+    "vite": "^4.5.0"
+  }
+}
