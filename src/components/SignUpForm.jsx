@@ -47,6 +47,7 @@ const SignUpForm = ({ onSignUp, onSwitchToLogin }) => {
     
     setLoading(true);
     setError('');
+    const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
 

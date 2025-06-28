@@ -497,11 +497,35 @@ aws sts get-caller-identity --query Account --output text
 #### 4. DynamoDB-Zugriff verweigert
 
 **Fehler**: `User is not authorized to perform: dynamodb:Query`
-**Lösung**:
+**Vollständiger Fehler**: 
+```
+User: arn:aws:sts::ACCOUNT:assumed-role/InfrastructureStack-CognitoAuthenticatedRole.../CognitoIdentityCredentials 
+is not authorized to perform: dynamodb:Query on resource: arn:aws:dynamodb:REGION:ACCOUNT:table/KeyValueStore 
+because no identity-based policy allows the dynamodb:Query action
+```
 
-- IAM-Policy für `CognitoAuthenticatedRole` prüfen
-- Sicherstellen, dass die Policy DynamoDB-Berechtigungen enthält
-- IAM-Policies neu generieren: `npm run generate-policies`
+**Ursache**: Die IAM-Policy für die Cognito-authentifizierten Benutzer hatte eine zu restriktive Bedingung, die das DynamoDB Query verhinderte.
+
+**Lösung**:
+1. **CDK Stack aktualisieren**: Die problematische Condition wurde aus der IAM-Policy entfernt
+2. **Stack neu deployen**:
+   ```bash
+   cd infrastructure
+   AWS_PROFILE=lanixx npx cdk deploy
+   ```
+
+**Technische Details**:
+- **Problem**: `ForAllValues:StringEquals` mit `${cognito-identity.amazonaws.com:sub}` verhinderte DynamoDB-Zugriff
+- **Lösung**: Condition temporär entfernt, um Funktionalität zu gewährleisten
+- **Sicherheit**: Row-level Security sollte in der Anwendungslogik implementiert werden (userId-basierte Filterung)
+
+**Betroffene Datei**: `infrastructure/lib/infrastructure-stack.ts`
+**Geänderte Zeilen**: IAM PolicyStatement - Conditions entfernt
+
+**Sicherheitshinweis**: 
+- Die aktuelle Lösung erlaubt authentifizierten Benutzern Zugriff auf die gesamte DynamoDB-Tabelle
+- Die Anwendung filtert Daten basierend auf der `userId` (Cognito Identity ID)
+- Für Produktionsumgebungen sollte eine funktionierende IAM-Condition implementiert werden
 
 #### 5. E-Mail-Bestätigung schlägt fehl
 
