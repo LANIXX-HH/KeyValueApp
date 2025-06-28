@@ -32,7 +32,7 @@ Die CDK-Infrastruktur erstellt automatisch:
 
 ### 1. Voraussetzungen
 
-```bash
+~~~bash
 # AWS CLI konfiguriert
 aws configure
 
@@ -41,19 +41,19 @@ node --version
 
 # CDK global installiert (optional)
 npm install -g aws-cdk
-```
+~~~
 
 ### 2. Repository klonen
 
-```bash
+~~~bash
 git clone <repository-url>
 cd cognito-keyvalue-app-v2
 npm install
-```
+~~~
 
 ### 3. CDK-Infrastruktur deployen
 
-```bash
+~~~bash
 # In den Infrastructure-Ordner wechseln
 cd infrastructure
 
@@ -65,13 +65,13 @@ npx cdk bootstrap
 
 # Stack deployen
 npx cdk deploy
-```
+~~~
 
 ### 4. CDK-Outputs notieren
 
 Nach dem Deployment zeigt CDK die erstellten Ressourcen an:
 
-bash```
+~~~bash
 ✅  InfrastructureStack
 
 Outputs:
@@ -80,12 +80,11 @@ InfrastructureStack.UserPoolClientId = xxxxxxxxxxxxxxxxxxxxxxxxxx
 InfrastructureStack.IdentityPoolId = eu-central-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 InfrastructureStack.DynamoDBTableName = KeyValueStore
 InfrastructureStack.Region = eu-central-1
-
-```
+~~~
 
 ### 5. .env-Datei konfigurieren
 
-```bash
+~~~bash
 # Zurück zum Root-Verzeichnis
 cd ..
 
@@ -94,34 +93,34 @@ cp .env.example .env
 
 # .env mit CDK-Outputs ausfüllen
 nano .env
-```
+~~~
 
 Beispiel `.env`:
 
-```bash
+~~~bash
 VITE_AWS_REGION=eu-central-1
 VITE_USER_POOL_ID=eu-central-1_XXXXXXXXX
 VITE_USER_POOL_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
 VITE_IDENTITY_POOL_ID=eu-central-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 VITE_DYNAMODB_TABLE_NAME=KeyValueStore
 VITE_AWS_ACCOUNT_ID=123456789012
-```
+~~~
 
 ### 6. App starten
 
-```bash
+~~~bash
 # Setup ausführen
 npm run setup
 
 # Development-Server starten
 npm run dev
-```
+~~~
 
 ## CDK-Befehle
 
 ### Nützliche CDK-Kommandos
 
-```bash
+~~~bash
 cd infrastructure
 
 # CloudFormation-Template anzeigen
@@ -135,11 +134,11 @@ npx cdk deploy
 
 # Stack löschen (⚠️ Vorsicht!)
 npx cdk destroy
-```
+~~~
 
 ### Stack-Informationen
 
-```bash
+~~~bash
 # Alle Stacks anzeigen
 npx cdk list
 
@@ -147,7 +146,7 @@ npx cdk list
 aws cloudformation describe-stacks \
   --stack-name InfrastructureStack \
   --query 'Stacks[0].Outputs'
-```
+~~~
 
 ## Vorteile von CDK
 
@@ -179,30 +178,30 @@ aws cloudformation describe-stacks \
 
 ### CDK Bootstrap-Fehler
 
-```bash
+~~~bash
 # Bootstrap für spezifische Region
 npx cdk bootstrap aws://ACCOUNT-ID/REGION
-```
+~~~
 
 ### Deployment-Fehler
 
-```bash
+~~~bash
 # Detaillierte Logs anzeigen
 npx cdk deploy --verbose
 
 # CloudFormation-Events prüfen
 aws cloudformation describe-stack-events \
   --stack-name InfrastructureStack
-```
+~~~
 
 ### Stack löschen
 
-```bash
+~~~bash
 # Alle Ressourcen löschen
 npx cdk destroy
 
 # ⚠️ Achtung: DynamoDB-Daten gehen verloren!
-```
+~~~
 
 ## Kosten
 
@@ -223,21 +222,21 @@ Die CDK-Tools selbst kosten nichts - du zahlst nur für die erstellten AWS-Resso
 
 ### Development-Stack
 
-```bash
+~~~bash
 npx cdk deploy --context environment=dev
-```
+~~~
 
 ### Production-Stack
 
-```bash
+~~~bash
 npx cdk deploy --context environment=prod
-```
+~~~
 
 ### Staging-Stack
 
-```bash
+~~~bash
 npx cdk deploy --context environment=staging
-```
+~~~
 
 ## Fazit
 
