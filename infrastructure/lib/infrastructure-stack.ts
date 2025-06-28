@@ -95,6 +95,7 @@ export class InfrastructureStack extends cdk.Stack {
         },
         'sts:AssumeRoleWithWebIdentity'
       ),
+      description: 'Role for Cognito authenticated users to access DynamoDB',
     });
 
     // DynamoDB Berechtigung für authentifizierte Benutzer
@@ -109,9 +110,19 @@ export class InfrastructureStack extends cdk.Stack {
           'dynamodb:Query',
           'dynamodb:Scan',
         ],
-        resources: [keyValueTable.tableArn],
-        // Note: Condition removed for now to fix permission issue
-        // In production, implement row-level security in application code
+        resources: [
+          keyValueTable.tableArn,
+          `${keyValueTable.tableArn}/index/*`, // For any GSI indexes
+        ],
+        // Temporarily removed conditions to ensure basic functionality
+        // TODO: Add proper row-level security conditions in production
+        /*
+        conditions: {
+          'ForAllValues:StringEquals': {
+            'dynamodb:LeadingKeys': ['${cognito-identity.amazonaws.com:sub}'],
+          },
+        },
+        */
       })
     );
 
@@ -147,6 +158,21 @@ export class InfrastructureStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'Region', {
       value: this.region,
       description: 'AWS Region',
+    });
+
+    new cdk.CfnOutput(this, 'AccountId', {
+      value: this.account,
+      description: 'AWS Account ID',
+    });
+
+    new cdk.CfnOutput(this, 'AuthenticatedRoleArn', {
+      value: authenticatedRole.roleArn,
+      description: 'Cognito Authenticated Role ARN',
+    });
+
+    new cdk.CfnOutput(this, 'DynamoDBTableArn', {
+      value: keyValueTable.tableArn,
+      description: 'DynamoDB Table ARN',
     });
   }
 }
